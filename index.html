@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+  <meta name="theme-color" content="#f5f5f5" media="(prefers-color-scheme: light)"/>
+  <meta name="theme-color" content="#1c1c1e" media="(prefers-color-scheme: dark)"/>
+  <meta name="description" content="Pakistan Petrol Price Alert"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+  <meta name="apple-mobile-web-app-title" content="PK Fuel"/>
+  <link rel="manifest" href="manifest.json"/>
+  <link rel="apple-touch-icon" href="icons/icon-192.png"/>
+  <title>PK Fuel Watch</title>
+  <!-- Segoe UI for Windows, SF Pro for iOS/macOS, system fallback -->
+  <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    /* ── DESIGN TOKENS (Fluent + iOS hybrid) ── */
+    :root {
+      /* Backgrounds — iOS layered system */
+      --bg-primary:    #f2f2f7;
+      --bg-secondary:  #ffffff;
+      --bg-tertiary:   #efeff4;
+      --bg-grouped:    #ffffff;
+      --bg-grouped2:   #f2f2f7;
+
+      /* Fluent accent — Microsoft blue */
+      --accent:        #0078d4;
+      --accent-light:  #cce4f7;
+      --accent-mid:    #005a9e;
+
+      /* Semantic */
+      --success:       #107c10;
+      --success-bg:    #dff6dd;
+      --danger:        #d13438;
+      --danger-bg:     #fde7e9;
+      --warning:       #c19c00;
+      --warning-bg:    #fff4ce;
+      --orange:        #ca5010;
+      --orange-bg:     #fce4d6;
+
+      /* Text — iOS system gray scale */
+      --text-primary:  #000000;
+      --text-secondary:#3c3c43;
+      --text-tertiary: #8e8e93;
+      --text-quat:     #aeaeb2;
+
+      /* Borders */
+      --sep:           rgba(60,60,67,0.12);
+      --sep-strong:    rgba(60,60,67,0.22);
+
+      /* Typography */
+      --font: 'Nunito Sans', 'Segoe UI', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+
+      /* Spacing */
+      --r-sm:  8px;
+      --r-md:  12px;
+      --r-lg:  16px;
+      --r-xl:  20px;
+
+      /* Shadows — Fluent-style elevation */
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 0 1px rgba(0,0,0,0.06);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.1),  0 0 1px rgba(0,0,0,0.06);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-primary:    #1c1c1e;
+        --bg-secondary:  #2c2c2e;
+        --bg-tertiary:   #3a3a3c;
+        --bg-grouped:    #2c2c2e;
+        --bg-grouped2:   #1c1c1e;
+        --accent:        #0a84ff;
+        --accent-light:  #0a3d6e;
+        --accent-mid:    #409cff;
+        --success:       #32d74b;
+        --success-bg:    #0d2e12;
+        --danger:        #ff453a;
+        --danger-bg:     #3a0d0d;
+        --warning:       #ffd60a;
+        --warning-bg:    #332900;
+        --orange:        #ff9f0a;
+        --orange-bg:     #3a2000;
+        --text-primary:  #ffffff;
+        --text-secondary:#ebebf5;
+        --text-tertiary: #8e8e93;
+        --text-quat:     #636366;
+        --sep:           rgba(255,255,255,0.10);
+        --sep-strong:    rgba(255,255,255,0.18);
+        --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+        --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+      }
+    }
+
+    /* ── RESET ── */
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+    html { font-size: 16px; }
+    body {
+      font-family: var(--font);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100dvh;
+      padding-bottom: calc(72px + env(safe-area-inset-bottom));
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* ── TYPOGRAPHY SCALE ── */
+    .t-largetitle  { font-size: 34px; font-weight: 700; letter-spacing: -0.5px; line-height: 1.2; }
+    .t-title1      { font-size: 28px; font-weight: 700; letter-spacing: -0.3px; line-height: 1.25; }
+    .t-title2      { font-size: 22px; font-weight: 700; letter-spacing: -0.2px; line-height: 1.3; }
+    .t-title3      { font-size: 20px; font-weight: 600; letter-spacing: -0.1px; line-height: 1.35; }
+    .t-headline    { font-size: 17px; font-weight: 600; line-height: 1.4; }
+    .t-body        { font-size: 17px; font-weight: 400; line-height: 1.5; }
+    .t-callout     { font-size: 16px; font-weight: 400; line-height: 1.5; }
+    .t-subhead     { font-size: 15px; font-weight: 400; line-height: 1.45; }
+    .t-footnote    { font-size: 13px; font-weight: 400; line-height: 1.4; }
+    .t-caption1    { font-size: 12px; font-weight: 400; line-height: 1.35; }
+    .t-caption2    { font-size: 11px; font-weight: 400; line-height: 1.3; }
+
+    /* ── PAGES ── */
+    .page { display: none; max-width: 480px; margin: 0 auto; padding: 0 0 24px; }
+    .page.active { display: block; }
+
+    /* ── PAGE HEADER (iOS large title style) ── */
+    .page-header {
+      padding: calc(env(safe-area-inset-top) + 12px) 20px 8px;
+      background: var(--bg-primary);
+      position: sticky; top: 0; z-index: 50;
+    }
+    .page-header-inner { display: flex; align-items: flex-end; justify-content: space-between; }
+    .page-title-row { display: flex; align-items: center; gap: 10px; }
+    .app-icon {
+      width: 36px; height: 36px; border-radius: 9px;
+      background: var(--accent); display: flex; align-items: center; justify-content: center;
+      font-size: 20px; flex-shrink: 0; box-shadow: var(--shadow-sm);
+    }
+    .page-header-meta { text-align: right; }
+    .pkt-time-label { font-size: 11px; color: var(--text-tertiary); font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; }
+    .pkt-time-val { font-size: 17px; font-weight: 600; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+
+    /* ── SECTION HEADERS (iOS grouped list style) ── */
+    .section-header {
+      font-size: 13px; font-weight: 600; color: var(--text-tertiary);
+      text-transform: uppercase; letter-spacing: 0.06em;
+      padding: 20px 20px 6px;
+    }
+
+    /* ── CARDS (Fluent surface) ── */
+    .card {
+      background: var(--bg-secondary);
+      border-radius: var(--r-xl);
+      box-shadow: var(--shadow-sm);
+      margin: 0 16px 4px;
+      overflow: hidden;
+    }
+    .card + .card { margin-top: 0; }
+    .card-padded { padding: 16px; }
+    .card-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 13px 16px; gap: 12px;
+    }
+    .card-row + .card-row { border-top: 0.5px solid var(--sep); }
+    .card-row-left { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
+
+    /* ── STATUS CARD ── */
+    .status-card {
+      margin: 4px 16px 0;
+      background: var(--bg-secondary);
+      border-radius: var(--r-xl);
+      box-shadow: var(--shadow-sm);
+      padding: 16px;
+      transition: background 0.25s, box-shadow 0.25s;
+    }
+    .status-card.s-alert {
+      background: var(--danger-bg);
+      box-shadow: 0 4px 16px rgba(209,52,56,0.15), var(--shadow-sm);
+    }
+    .status-card.s-stable {
+      background: var(--success-bg);
+      box-shadow: 0 4px 16px rgba(16,124,16,0.1), var(--shadow-sm);
+    }
+    .status-card.s-checking { background: var(--warning-bg); }
+
+    .status-top { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+    .status-icon-wrap {
+      width: 36px; height: 36px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; flex-shrink: 0;
+      background: rgba(0,0,0,0.06);
+      transition: background 0.25s;
+    }
+    .s-alert  .status-icon-wrap { background: rgba(209,52,56,0.12); }
+    .s-stable .status-icon-wrap { background: rgba(16,124,16,0.12); }
+    .s-checking .status-icon-wrap { background: rgba(193,156,0,0.12); }
+
+    .status-title { font-size: 17px; font-weight: 600; color: var(--text-primary); }
+    .status-subtitle { font-size: 14px; color: var(--text-tertiary); margin-top: 1px; }
+
+    /* ── PRICE DELTA (big number) ── */
+    .delta-block { padding: 14px 0 6px; border-top: 0.5px solid var(--sep); margin-top: 14px; }
+    .delta-num {
+      font-size: 52px; font-weight: 700; line-height: 1;
+      letter-spacing: -2px; margin-bottom: 4px;
+      font-variant-numeric: tabular-nums;
+    }
+    .delta-num.up   { color: var(--danger); }
+    .delta-num.down { color: var(--success); }
+    .delta-unit { font-size: 16px; font-weight: 500; color: var(--text-tertiary); margin-left: 4px; letter-spacing: 0; }
+    .delta-headline { font-size: 15px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 10px; }
+    .delta-summary { font-size: 14px; color: var(--text-tertiary); line-height: 1.6; padding-left: 12px; border-left: 3px solid var(--danger); margin-bottom: 14px; }
+
+    /* ── PRICE TILES ── */
+    .price-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+    .price-tile {
+      background: var(--bg-tertiary); border-radius: var(--r-md);
+      padding: 12px; border: 1px solid var(--sep);
+    }
+    .price-tile.tile-new {
+      background: var(--danger-bg);
+      border-color: rgba(209,52,56,0.2);
+    }
+    .price-tile.tile-down {
+      background: var(--success-bg);
+      border-color: rgba(16,124,16,0.2);
+    }
+    .tile-label { font-size: 11px; font-weight: 600; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+    .tile-val { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text-primary); }
+    .tile-val.val-red { color: var(--danger); }
+    .tile-val.val-green { color: var(--success); }
+    .tile-unit { font-size: 12px; color: var(--text-tertiary); font-weight: 400; }
+
+    /* ── FILL UP BANNER ── */
+    .fillup-banner {
+      background: var(--warning-bg); border: 1px solid rgba(193,156,0,0.3);
+      border-radius: var(--r-md); padding: 12px 14px;
+      display: flex; align-items: center; gap: 12px; margin-top: 10px;
+    }
+    .fillup-icon { font-size: 22px; flex-shrink: 0; }
+    .fillup-title { font-size: 14px; font-weight: 700; color: var(--warning); margin-bottom: 2px; }
+    .fillup-sub { font-size: 12px; color: var(--text-tertiary); line-height: 1.4; }
+
+    .eff-pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: var(--orange-bg); color: var(--orange);
+      font-size: 12px; font-weight: 600; padding: 4px 10px;
+      border-radius: 100px; margin-bottom: 10px;
+    }
+    .source-line { font-size: 11px; color: var(--text-quat); margin-top: 8px; }
+
+    /* ── ACTION BUTTONS (Fluent) ── */
+    .btn-section { padding: 14px 16px 4px; display: flex; flex-direction: column; gap: 10px; }
+    .btn-row { display: flex; gap: 10px; }
+    .btn {
+      flex: 1; border: none; border-radius: var(--r-lg);
+      padding: 14px 16px; font-size: 15px; font-weight: 600;
+      cursor: pointer; font-family: var(--font);
+      transition: opacity 0.15s, transform 0.1s;
+      display: flex; align-items: center; justify-content: center; gap: 7px;
+      -webkit-user-select: none; user-select: none;
+    }
+    .btn:active { transform: scale(0.97); opacity: 0.85; }
+    .btn:disabled { opacity: 0.38; cursor: not-allowed; transform: none; }
+    .btn-primary { background: var(--accent); color: #ffffff; box-shadow: var(--shadow-sm); }
+    .btn-secondary { background: var(--bg-secondary); color: var(--accent); box-shadow: var(--shadow-sm); border: 0.5px solid var(--sep-strong); }
+    .btn-secondary.active-state { background: var(--accent-light); color: var(--accent); border-color: var(--accent); }
+    .btn-ghost { background: var(--bg-secondary); color: var(--text-secondary); box-shadow: var(--shadow-sm); border: 0.5px solid var(--sep); }
+    .btn-ghost.active-state { background: var(--success-bg); color: var(--success); border-color: var(--success); }
+    .btn-danger-ghost { background: var(--bg-secondary); color: var(--danger); box-shadow: var(--shadow-sm); border: 0.5px solid var(--sep); }
+
+    /* ── FUEL TABS ── */
+    .seg-control {
+      display: flex; margin: 8px 16px 0;
+      background: var(--bg-tertiary); border-radius: var(--r-lg);
+      padding: 3px; gap: 0;
+    }
+    .seg-btn {
+      flex: 1; padding: 8px 4px; border: none; background: none;
+      font-family: var(--font); font-size: 13px; font-weight: 500;
+      color: var(--text-tertiary); cursor: pointer;
+      border-radius: 11px; transition: all 0.18s;
+    }
+    .seg-btn.active {
+      background: var(--bg-secondary); color: var(--text-primary);
+      font-weight: 600; box-shadow: var(--shadow-sm);
+    }
+
+    /* ── CHART ── */
+    .chart-wrap { padding: 0 16px 16px; }
+    .chart-inner { position: relative; height: 200px; }
+
+    /* ── HISTORY LIST ── */
+    .hist-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; }
+    .hist-item + .hist-item { border-top: 0.5px solid var(--sep); }
+    .hist-badge {
+      width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; font-weight: 700;
+    }
+    .hist-badge.up { background: var(--danger-bg); color: var(--danger); }
+    .hist-badge.down { background: var(--success-bg); color: var(--success); }
+    .hist-badge.none { background: var(--bg-tertiary); color: var(--text-tertiary); }
+    .hist-info { flex: 1; min-width: 0; }
+    .hist-date { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+    .hist-fuel { font-size: 13px; color: var(--text-tertiary); margin-top: 1px; }
+    .hist-right { text-align: right; }
+    .hist-chg { font-size: 16px; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .hist-chg.up { color: var(--danger); }
+    .hist-chg.down { color: var(--success); }
+    .hist-price { font-size: 12px; color: var(--text-tertiary); margin-top: 2px; }
+
+    /* ── CALCULATOR ── */
+    .calc-input-row { padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; }
+    .calc-input-row + .calc-input-row { border-top: 0.5px solid var(--sep); }
+    .calc-label-col { flex: 1; }
+    .calc-input-label { font-size: 16px; font-weight: 500; color: var(--text-primary); }
+    .calc-input-sub { font-size: 12px; color: var(--text-tertiary); margin-top: 1px; }
+    .calc-input-field {
+      width: 90px; padding: 8px 12px; border-radius: var(--r-md);
+      background: var(--bg-tertiary); border: 1px solid var(--sep-strong);
+      color: var(--text-primary); font-family: var(--font); font-size: 16px;
+      font-weight: 600; text-align: right; outline: none;
+      transition: border-color 0.15s; font-variant-numeric: tabular-nums;
+    }
+    .calc-input-field:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,120,212,0.15); }
+
+    .result-card { margin: 0 16px 4px; border-radius: var(--r-xl); overflow: hidden; box-shadow: var(--shadow-sm); }
+    .result-row { display: flex; align-items: center; justify-content: space-between; padding: 13px 16px; background: var(--bg-secondary); }
+    .result-row + .result-row { border-top: 0.5px solid var(--sep); }
+    .result-label { font-size: 15px; color: var(--text-secondary); }
+    .result-val { font-size: 17px; font-weight: 700; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+    .result-val.val-red { color: var(--danger); }
+    .result-val.val-green { color: var(--success); }
+    .result-row.total-row { background: var(--accent); }
+    .result-row.total-row .result-label { color: rgba(255,255,255,0.85); font-weight: 600; }
+    .result-row.total-row .result-val { color: #fff; font-size: 20px; }
+
+    /* ── SETTINGS ── */
+    .setting-row { display: flex; align-items: center; gap: 12px; padding: 13px 16px; }
+    .setting-row + .setting-row { border-top: 0.5px solid var(--sep); }
+    .setting-icon {
+      width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 16px;
+    }
+    .setting-info { flex: 1; min-width: 0; }
+    .setting-label { font-size: 16px; font-weight: 500; color: var(--text-primary); }
+    .setting-sub { font-size: 12px; color: var(--text-tertiary); margin-top: 1px; }
+    /* iOS toggle */
+    .ios-toggle {
+      width: 51px; height: 31px; border-radius: 100px;
+      background: var(--sep-strong); position: relative; cursor: pointer;
+      transition: background 0.25s; flex-shrink: 0; -webkit-appearance: none; appearance: none;
+      border: none; outline: none;
+    }
+    .ios-toggle:checked { background: #34c759; }
+    @media (prefers-color-scheme: dark) { .ios-toggle:checked { background: #30d158; } }
+    .ios-toggle::after {
+      content: ''; position: absolute; top: 2px; left: 2px;
+      width: 27px; height: 27px; border-radius: 100px;
+      background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.25);
+      transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
+    }
+    .ios-toggle:checked::after { transform: translateX(20px); }
+    .threshold-input {
+      width: 72px; padding: 7px 10px; border-radius: var(--r-md);
+      background: var(--bg-tertiary); border: 1px solid var(--sep-strong);
+      color: var(--text-primary); font-family: var(--font); font-size: 16px;
+      font-weight: 600; text-align: center; outline: none;
+    }
+    .threshold-input:focus { border-color: var(--accent); }
+    .select-field {
+      padding: 7px 10px; border-radius: var(--r-md);
+      background: var(--bg-tertiary); border: 1px solid var(--sep-strong);
+      color: var(--text-primary); font-family: var(--font); font-size: 15px;
+      font-weight: 500; outline: none; cursor: pointer;
+    }
+
+    /* ── CURRENT PRICES MINI WIDGET ── */
+    .prices-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+    .prices-grid > div { padding: 14px 16px; }
+    .prices-grid > div:nth-child(2) { border-left: 0.5px solid var(--sep); }
+    .prices-grid > div:nth-child(3) { border-top: 0.5px solid var(--sep); }
+    .prices-grid > div:nth-child(4) { border-top: 0.5px solid var(--sep); border-left: 0.5px solid var(--sep); }
+    .fuel-label { font-size: 12px; font-weight: 600; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+    .fuel-price { font-size: 22px; font-weight: 700; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+    .fuel-unit { font-size: 12px; color: var(--text-tertiary); font-weight: 400; }
+
+    /* ── TONIGHT REMINDER ── */
+    .tonight-card {
+      margin: 4px 16px 0; border-radius: var(--r-xl);
+      background: var(--warning-bg); border: 1px solid rgba(193,156,0,0.2);
+      padding: 14px 16px; display: flex; align-items: center; gap: 12px;
+    }
+    .tonight-icon { font-size: 26px; flex-shrink: 0; }
+    .tonight-title { font-size: 15px; font-weight: 700; color: var(--warning); margin-bottom: 2px; }
+    .tonight-sub { font-size: 13px; color: var(--text-tertiary); line-height: 1.4; }
+
+    /* ── INSTALL BANNER ── */
+    .install-banner {
+      margin: 4px 16px 0; border-radius: var(--r-xl);
+      background: var(--bg-secondary); box-shadow: var(--shadow-sm);
+      padding: 14px 16px; display: none; align-items: center; gap: 12px;
+    }
+    .install-icon { font-size: 26px; flex-shrink: 0; }
+    .install-title { font-size: 15px; font-weight: 600; color: var(--text-primary); margin-bottom: 2px; }
+    .install-sub { font-size: 13px; color: var(--text-tertiary); }
+    .install-action {
+      margin-left: auto; flex-shrink: 0; padding: 9px 14px;
+      background: var(--accent); color: white; border: none; border-radius: var(--r-md);
+      font-family: var(--font); font-size: 14px; font-weight: 600; cursor: pointer;
+    }
+
+    /* ── LOG ── */
+    .log-item { display: flex; gap: 10px; align-items: center; padding: 10px 16px; }
+    .log-item + .log-item { border-top: 0.5px solid var(--sep); }
+    .log-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .log-dot.red { background: var(--danger); }
+    .log-dot.green { background: var(--success); }
+    .log-dot.warn { background: var(--warning); }
+    .log-time { font-size: 12px; color: var(--text-quat); font-variant-numeric: tabular-nums; min-width: 42px; }
+    .log-text { font-size: 14px; color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+    .log-badge {
+      font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 100px;
+      flex-shrink: 0; white-space: nowrap;
+    }
+    .log-badge.change { background: var(--danger-bg); color: var(--danger); }
+    .log-badge.stable { background: var(--success-bg); color: var(--success); }
+    .log-badge.err { background: var(--warning-bg); color: var(--warning); }
+
+    /* ── BOTTOM NAV (iOS tab bar) ── */
+    .tab-bar {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(248,248,248,0.92); backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border-top: 0.5px solid var(--sep-strong);
+      display: flex;
+      padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
+    }
+    @media (prefers-color-scheme: dark) {
+      .tab-bar { background: rgba(28,28,30,0.92); }
+    }
+    .tab-item {
+      flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px;
+      cursor: pointer; padding: 4px 0; border: none; background: none;
+      font-family: var(--font); color: var(--text-tertiary); transition: color 0.15s;
+    }
+    .tab-item.active { color: var(--accent); }
+    .tab-icon { font-size: 22px; line-height: 1; }
+    .tab-label { font-size: 10px; font-weight: 500; letter-spacing: -0.01em; }
+
+    /* ── MISC ── */
+    .spinner {
+      display: inline-block; width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.3); border-top-color: white;
+      border-radius: 50%; animation: spin 0.7s linear infinite;
+    }
+    .spinner.dark { border-color: rgba(0,0,0,0.12); border-top-color: var(--accent); }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .last-checked-row { padding: 8px 16px 0; }
+    .last-checked-text { font-size: 12px; color: var(--text-quat); }
+
+    .empty-state { padding: 40px 20px; text-align: center; }
+    .empty-state-icon { font-size: 40px; margin-bottom: 12px; }
+    .empty-state-title { font-size: 17px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; }
+    .empty-state-sub { font-size: 15px; color: var(--text-tertiary); line-height: 1.5; }
+
+    .footer-text { padding: 20px; text-align: center; font-size: 12px; color: var(--text-quat); line-height: 1.7; }
+
+    /* Acrylic/Mica top gradient for depth */
+    .page-header::after {
+      content: ''; position: absolute; left: 0; right: 0; bottom: -8px; height: 8px;
+      background: linear-gradient(to bottom, var(--bg-primary), transparent);
+      pointer-events: none;
+    }
+    .page-header { position: sticky; top: 0; z-index: 50; }
+
+    /* Smooth chevron for list items */
+    .chevron::after {
+      content: ''; display: inline-block;
+      width: 7px; height: 7px; border-right: 1.5px solid var(--text-quat); border-top: 1.5px solid var(--text-quat);
+      transform: rotate(45deg) translateY(-1px); flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════
+     PAGE: MONITOR
+══════════════════════════════ -->
+<div class="page active" id="page-home">
+  <div class="page-header">
+    <div class="page-header-inner">
+      <div class="page-title-row">
+        <div class="app-icon">⛽</div>
+        <div>
+          <div class="t-title2">PK Fuel Watch</div>
+          <div class="t-caption1" style="color:var(--text-tertiary);margin-top:1px">Pakistan price monitor</div>
+        </div>
+      </div>
+      <div class="page-header-meta">
+        <div class="pkt-time-label">PKT</div>
+        <div class="pkt-time-val" id="pkt-clock">--:--</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Install Banner -->
+  <div class="install-banner" id="install-banner">
+    <span class="install-icon">📲</span>
+    <div>
+      <div class="install-title">Install App</div>
+      <div class="install-sub">Add to home screen for notifications</div>
+    </div>
+    <button class="install-action" id="install-btn">Install</button>
+  </div>
+
+  <!-- Status Card -->
+  <div style="height:8px"></div>
+  <div class="status-card" id="status-card">
+    <div class="status-top">
+      <div class="status-icon-wrap" id="s-icon">⛽</div>
+      <div>
+        <div class="status-title" id="s-title">Ready to check</div>
+        <div class="status-subtitle" id="s-sub">Tap Check Now to scan for price changes</div>
+      </div>
+    </div>
+    <div id="alert-body"></div>
+  </div>
+  <div class="last-checked-row"><div class="last-checked-text" id="last-checked"></div></div>
+
+  <!-- Action Buttons -->
+  <div class="btn-section">
+    <div class="btn-row">
+      <button class="btn btn-primary" id="check-btn" onclick="checkPrices()">
+        <span id="check-icon">⚡</span> Check Now
+      </button>
+      <button class="btn btn-secondary" id="auto-btn" onclick="toggleAuto()">
+        ▶ Auto
+      </button>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" id="notif-btn" onclick="requestNotif()">🔔 Enable Alerts</button>
+      <button class="btn btn-ghost" id="share-btn" onclick="sharePrice()" style="display:none">📤 Share</button>
+    </div>
+  </div>
+
+  <!-- Tonight Card -->
+  <div class="tonight-card" id="tonight-card" style="display:none">
+    <span class="tonight-icon">🕙</span>
+    <div>
+      <div class="tonight-title">11 PM Reminder Active</div>
+      <div class="tonight-sub">Auto-checking at 10 PM tonight for price changes</div>
+    </div>
+  </div>
+
+  <!-- Current Prices -->
+  <div class="section-header">Current Prices</div>
+  <div class="card" id="prices-widget">
+    <div class="prices-grid" id="prices-grid">
+      <div><div class="fuel-label">⛽ Petrol</div><div class="fuel-price">248<span class="fuel-unit">.56</span></div><div class="fuel-unit" style="font-size:11px;margin-top:2px">Rs / Litre</div></div>
+      <div><div class="fuel-label">🛢 Diesel</div><div class="fuel-price">256<span class="fuel-unit">.42</span></div><div class="fuel-unit" style="font-size:11px;margin-top:2px">Rs / Litre</div></div>
+      <div><div class="fuel-label">🕯 Kerosene</div><div class="fuel-price">155<span class="fuel-unit">.56</span></div><div class="fuel-unit" style="font-size:11px;margin-top:2px">Rs / Litre</div></div>
+      <div><div class="fuel-label">🔵 LPG</div><div class="fuel-price">170<span class="fuel-unit">.00</span></div><div class="fuel-unit" style="font-size:11px;margin-top:2px">Rs / kg</div></div>
+    </div>
+  </div>
+
+  <!-- Check Log -->
+  <div id="log-section" style="display:none">
+    <div class="section-header">Recent Checks</div>
+    <div class="card" id="log-list"></div>
+  </div>
+
+  <div class="footer-text">PK Fuel Watch · Sources: OGRA, Dawn, Geo, ARY<br>Not official · For awareness only</div>
+</div>
+
+<!-- ══════════════════════════════
+     PAGE: HISTORY
+══════════════════════════════ -->
+<div class="page" id="page-history">
+  <div class="page-header">
+    <div class="t-title2" style="padding:4px 0">Price History</div>
+  </div>
+
+  <div class="seg-control" id="chart-tabs">
+    <button class="seg-btn active" onclick="switchFuel('petrol',this)">⛽ Petrol</button>
+    <button class="seg-btn" onclick="switchFuel('diesel',this)">🛢 Diesel</button>
+    <button class="seg-btn" onclick="switchFuel('kerosene',this)">🕯 Kerosene</button>
+  </div>
+
+  <div class="section-header">Trend Chart</div>
+  <div class="card">
+    <div class="chart-wrap">
+      <div class="chart-inner"><canvas id="priceChart"></canvas></div>
+    </div>
+  </div>
+
+  <div class="section-header">Change Log</div>
+  <div class="card" id="hist-list"></div>
+</div>
+
+<!-- ══════════════════════════════
+     PAGE: CALCULATOR
+══════════════════════════════ -->
+<div class="page" id="page-calc">
+  <div class="page-header">
+    <div class="t-title2" style="padding:4px 0">Cost Calculator</div>
+  </div>
+
+  <div class="section-header">Your Vehicle</div>
+  <div class="card">
+    <div class="calc-input-row">
+      <div class="calc-label-col">
+        <div class="calc-input-label">Tank Size</div>
+        <div class="calc-input-sub">In litres</div>
+      </div>
+      <input class="calc-input-field" id="c-tank" type="number" value="40" min="1" max="200" oninput="calcCost()"/>
+    </div>
+    <div class="calc-input-row">
+      <div class="calc-label-col">
+        <div class="calc-input-label">Fuel Economy</div>
+        <div class="calc-input-sub">km per litre</div>
+      </div>
+      <input class="calc-input-field" id="c-kml" type="number" value="12" min="1" max="50" oninput="calcCost()"/>
+    </div>
+    <div class="calc-input-row">
+      <div class="calc-label-col">
+        <div class="calc-input-label">Monthly Distance</div>
+        <div class="calc-input-sub">km per month</div>
+      </div>
+      <input class="calc-input-field" id="c-km" type="number" value="1200" min="1" oninput="calcCost()"/>
+    </div>
+  </div>
+
+  <div class="section-header">Monthly Breakdown</div>
+  <div class="result-card" id="calc-results">
+    <div class="result-row"><span class="result-label">Litres Needed</span><span class="result-val" id="r-litres">100 L</span></div>
+    <div class="result-row"><span class="result-label">Current Cost</span><span class="result-val" id="r-cur">Rs 24,856</span></div>
+    <div class="result-row"><span class="result-label">Fill One Tank</span><span class="result-val" id="r-tank">Rs 9,942</span></div>
+    <div class="result-row" id="r-new-row" style="display:none"><span class="result-label">New Monthly Cost</span><span class="result-val val-red" id="r-new">—</span></div>
+    <div class="result-row" id="r-diff-row" style="display:none"><span class="result-label">Monthly Difference</span><span class="result-val" id="r-diff">—</span></div>
+    <div class="result-row total-row" id="r-save-row" style="display:none"><span class="result-label">Tank Fill Saving</span><span class="result-val" id="r-save">—</span></div>
+  </div>
+
+  <div class="section-header">Fill Up Advice</div>
+  <div class="card">
+    <div style="padding: 16px" id="fillup-advice">
+      <div class="empty-state-sub">Run a price check first to see personalised fill-up advice</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     PAGE: SETTINGS
+══════════════════════════════ -->
+<div class="page" id="page-settings">
+  <div class="page-header">
+    <div class="t-title2" style="padding:4px 0">Settings</div>
+  </div>
+
+  <div class="section-header">Notifications</div>
+  <div class="card">
+    <div class="setting-row">
+      <div class="setting-icon" style="background:var(--danger-bg)">🔔</div>
+      <div class="setting-info">
+        <div class="setting-label">Price Change Alerts</div>
+        <div class="setting-sub">Notify on any fuel price change</div>
+      </div>
+      <input type="checkbox" class="ios-toggle" id="t-main" checked onchange="saveSetting('main',this.checked)"/>
+    </div>
+    <div class="setting-row">
+      <div class="setting-icon" style="background:var(--warning-bg)">🚨</div>
+      <div class="setting-info">
+        <div class="setting-label">Fill Up Reminder</div>
+        <div class="setting-sub">Alert 1 hour before 11 PM if increase found</div>
+      </div>
+      <input type="checkbox" class="ios-toggle" id="t-fillup" checked onchange="saveSetting('fillup',this.checked)"/>
+    </div>
+    <div class="setting-row">
+      <div class="setting-icon" style="background:var(--accent-light)">🕙</div>
+      <div class="setting-info">
+        <div class="setting-label">Nightly Auto-Check</div>
+        <div class="setting-sub">Auto-scan at 10 PM every night</div>
+      </div>
+      <input type="checkbox" class="ios-toggle" id="t-nightly" checked onchange="saveSetting('nightly',this.checked)"/>
+    </div>
+    <div class="setting-row">
+      <div class="setting-icon" style="background:var(--success-bg)">📉</div>
+      <div class="setting-info">
+        <div class="setting-label">Price Drop Alerts</div>
+        <div class="setting-sub">Also notify when prices decrease</div>
+      </div>
+      <input type="checkbox" class="ios-toggle" id="t-drop" checked onchange="saveSetting('drop',this.checked)"/>
+    </div>
+  </div>
+
+  <div class="section-header">Alert Threshold</div>
+  <div class="card">
+    <div class="setting-row">
+      <div class="setting-icon" style="background:var(--bg-tertiary)">📏</div>
+      <div class="setting-info">
+        <div class="setting-label">Minimum Change (Rs)</div>
+        <div class="setting-sub">Only alert if change exceeds this</div>
+      </div>
+      <input class="threshold-input" id="threshold-val" type="number" value="0" min="0" max="50" step="0.5" onchange="saveSetting('threshold',this.value)"/>
+    </div>
+  </div>
+
+  <div class="section-header">Fuel Types</div>
+  <div class="card">
+    <div class="setting-row">
+      <div class="setting-icon" style="background:#fff3e0">⛽</div>
+      <div class="setting-info"><div class="setting-label">Petrol</div></div>
+      <input type="checkbox" class="ios-toggle" checked onchange="saveSetting('petrol',this.checked)"/>
+    </div>
+    <div class="setting-row">
+      <div class="setting-icon" style="background:#e8f4f8">🛢</div>
+      <div class="setting-info"><div class="setting-label">Diesel (HSD)</div></div>
+      <input type="checkbox" class="ios-toggle" checked onchange="saveSetting('diesel',this.checked)"/>
+    </div>
+    <div class="setting-row">
+      <div class="setting-icon" style="background:#fafafa">🕯</div>
+      <div class="setting-info"><div class="setting-label">Kerosene</div></div>
+      <input type="checkbox" class="ios-toggle" onchange="saveSetting('kerosene',this.checked)"/>
+    </div>
+    <div class="setting-row">
+      <div class="setting-icon" style="background:#e8eaf6">🔵</div>
+      <div class="setting-info"><div class="setting-label">LPG</div></div>
+      <input type="checkbox" class="ios-toggle" onchange="saveSetting('lpg',this.checked)"/>
+    </div>
+  </div>
+
+  <div class="section-header">Auto Refresh</div>
+  <div class="card">
+    <div class="setting-row">
+      <div class="setting-icon" style="background:var(--accent-light)">⏱</div>
+      <div class="setting-info">
+        <div class="setting-label">Refresh Interval</div>
+        <div class="setting-sub">Background check frequency</div>
+      </div>
+      <select class="select-field" id="interval-select" onchange="saveSetting('interval',this.value)">
+        <option value="5">5 min</option>
+        <option value="10" selected>10 min</option>
+        <option value="15">15 min</option>
+        <option value="30">30 min</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="footer-text">PK Fuel Watch v2.0<br>Built for Pakistan 🇵🇰</div>
+</div>
+
+<!-- ══════════════════════════════
+     BOTTOM TAB BAR
+══════════════════════════════ -->
+<nav class="tab-bar">
+  <button class="tab-item active" id="nav-home" onclick="goPage('home')">
+    <span class="tab-icon">⛽</span>
+    <span class="tab-label">Monitor</span>
+  </button>
+  <button class="tab-item" id="nav-history" onclick="goPage('history')">
+    <span class="tab-icon">📊</span>
+    <span class="tab-label">History</span>
+  </button>
+  <button class="tab-item" id="nav-calc" onclick="goPage('calc')">
+    <span class="tab-icon">💰</span>
+    <span class="tab-label">Calculator</span>
+  </button>
+  <button class="tab-item" id="nav-settings" onclick="goPage('settings')">
+    <span class="tab-icon">⚙️</span>
+    <span class="tab-label">Settings</span>
+  </button>
+</nav>
+
+<script>
+if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+
+/* ── STATE ── */
+const S = {
+  lastData: null, lastChecked: null,
+  autoMode: false, autoTimer: null, cdTimer: null, countdown: 0,
+  notifGranted: Notification?.permission==='granted',
+  log: [],
+  prices: {petrol:248.56, diesel:256.42, kerosene:155.56, lpg:170.00},
+  settings: {main:true,fillup:true,nightly:true,drop:true,petrol:true,diesel:true,kerosene:false,lpg:false,threshold:0,interval:10},
+  history:[
+    {date:'Feb 2024',petrol:279.75,diesel:293.37,change:0,dir:'none'},
+    {date:'Mar 2024',petrol:272.89,diesel:284.69,change:-6.86,dir:'down'},
+    {date:'Apr 2024',petrol:289.41,diesel:282.24,change:+16.52,dir:'up'},
+    {date:'Jun 2024',petrol:278.96,diesel:278.27,change:-10.45,dir:'down'},
+    {date:'Aug 2024',petrol:264.70,diesel:267.85,change:-14.26,dir:'down'},
+    {date:'Oct 2024',petrol:248.38,diesel:255.14,change:-16.32,dir:'down'},
+    {date:'Dec 2024',petrol:252.65,diesel:258.01,change:+4.27,dir:'up'},
+    {date:'Feb 2025',petrol:254.63,diesel:261.95,change:+1.98,dir:'up'},
+    {date:'Apr 2025',petrol:248.56,diesel:256.42,change:-6.07,dir:'down'},
+  ],
+  activeFuel:'petrol', chart: null
+};
+
+/* ── CLOCK ── */
+setInterval(()=>{
+  document.getElementById('pkt-clock').textContent =
+    new Date().toLocaleTimeString('en-PK',{timeZone:'Asia/Karachi',hour:'2-digit',minute:'2-digit'});
+},1000);
+document.getElementById('pkt-clock').textContent =
+  new Date().toLocaleTimeString('en-PK',{timeZone:'Asia/Karachi',hour:'2-digit',minute:'2-digit'});
+
+/* ── NIGHTLY SCHEDULE ── */
+function scheduleNightly(){
+  const pkNow = new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Karachi'}));
+  const t = new Date(pkNow); t.setHours(22,0,0,0);
+  if(pkNow>=t) t.setDate(t.getDate()+1);
+  setTimeout(()=>{ if(S.settings.nightly){checkPrices();scheduleNightly();} }, t-pkNow);
+  document.getElementById('tonight-card').style.display = S.settings.nightly?'flex':'none';
+}
+scheduleNightly();
+
+/* ── NAVIGATION ── */
+function goPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-item').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.getElementById('nav-'+name).classList.add('active');
+  if(name==='history') renderHistory();
+  if(name==='calc') calcCost();
+}
+
+/* ── INSTALL ── */
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault(); deferredPrompt=e;
+  document.getElementById('install-banner').style.display='flex';
+});
+document.getElementById('install-btn').addEventListener('click',async()=>{
+  if(!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const {outcome}=await deferredPrompt.userChoice;
+  if(outcome==='accepted') document.getElementById('install-banner').style.display='none';
+  deferredPrompt=null;
+});
+
+/* ── NOTIFICATIONS ── */
+if(S.notifGranted){
+  const b=document.getElementById('notif-btn');
+  b.textContent='🔔 Alerts Enabled'; b.classList.add('active-state');
+}
+async function requestNotif(){
+  if(!('Notification' in window)){alert('Notifications not supported.');return;}
+  const perm=await Notification.requestPermission();
+  S.notifGranted=(perm==='granted');
+  const b=document.getElementById('notif-btn');
+  if(S.notifGranted){b.textContent='🔔 Alerts Enabled';b.classList.add('active-state');}
+  else b.textContent='🔕 Blocked in Settings';
+}
+function sendNotif(title,body,urgent){
+  if(!S.notifGranted||!S.settings.main) return;
+  if('Notification' in window)
+    new Notification(title,{body,icon:'icons/icon-192.png',vibrate:urgent?[300,100,300]:[200,100,200]});
+}
+
+/* ── AUTO MODE ── */
+function toggleAuto(){
+  S.autoMode=!S.autoMode;
+  const btn=document.getElementById('auto-btn');
+  const ms=(S.settings.interval||10)*60000;
+  if(S.autoMode){
+    btn.textContent='⏸ Auto On'; btn.classList.add('active-state');
+    S.countdown=ms/1000;
+    S.autoTimer=setInterval(checkPrices,ms);
+    S.cdTimer=setInterval(()=>{S.countdown--;if(S.countdown<=0)S.countdown=ms/1000;renderLastChecked();},1000);
+  } else {
+    btn.textContent='▶ Auto'; btn.classList.remove('active-state');
+    clearInterval(S.autoTimer); clearInterval(S.cdTimer);
+    S.countdown=0; renderLastChecked();
+  }
+}
+function renderLastChecked(){
+  const el=document.getElementById('last-checked');
+  if(!S.lastChecked){el.textContent='';return;}
+  let t='Last checked '+S.lastChecked.toLocaleTimeString('en-PK',{timeZone:'Asia/Karachi'});
+  if(S.autoMode&&S.countdown>0){
+    const m=Math.floor(S.countdown/60),s=S.countdown%60;
+    t+=` · Next in ${m}:${String(s).padStart(2,'0')}`;
+  }
+  el.textContent=t;
+}
+
+/* ── STATUS HELPERS ── */
+function setStatus(type,title,sub,icon){
+  const card=document.getElementById('status-card');
+  card.className='status-card s-'+type;
+  document.getElementById('s-icon').textContent=icon;
+  document.getElementById('s-title').textContent=title;
+  document.getElementById('s-sub').textContent=sub;
+}
+
+/* ── MAIN CHECK ── */
+async function checkPrices(){
+  const btn=document.getElementById('check-btn');
+  btn.disabled=true;
+  document.getElementById('check-icon').outerHTML='<span id="check-icon" class="spinner"></span>';
+  document.getElementById('check-btn').childNodes[1].textContent=' Scanning…';
+  setStatus('checking','Scanning sources…','Searching OGRA & Pakistani news…','🔍');
+  document.getElementById('alert-body').innerHTML='';
+  const ts=new Date().toLocaleTimeString('en-PK',{timeZone:'Asia/Karachi',hour:'2-digit',minute:'2-digit'});
+  try {
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',max_tokens:1000,
+        tools:[{type:'web_search_20250305',name:'web_search'}],
+        system:`You are a Pakistan fuel price intelligence agent. Search for very latest Pakistan petrol/diesel price news. Return ONLY valid JSON no markdown:
+{"hasAlert":true/false,"priceChange":"+X.XX"/"-X.XX"/"0","direction":"up"/"down"/"none","effectiveTime":"ISO or null","headline":"short headline","source":"source","summary":"2-3 sentences","currentPetrolPrice":number/null,"currentDieselPrice":number/null,"newPetrolPrice":number/null,"newDieselPrice":number/null,"newKeroPrice":number/null,"confidence":"high/medium/low"}`,
+        messages:[{role:'user',content:`Today is ${new Date().toLocaleDateString('en-PK',{timeZone:'Asia/Karachi'})}. Find latest Pakistan petrol price change or OGRA notification. Return JSON only.`}]
+      })
+    });
+    const data=await res.json();
+    const tb=data.content?.find(b=>b.type==='text');
+    if(!tb) throw new Error('No response');
+    let raw=tb.text.trim().replace(/```json|```/g,'').trim();
+    const p=JSON.parse(raw);
+    S.lastData=p; S.lastChecked=new Date(); renderLastChecked();
+    if(p.currentPetrolPrice) S.prices.petrol=p.currentPetrolPrice;
+    if(p.currentDieselPrice) S.prices.diesel=p.currentDieselPrice;
+    renderPricesWidget();
+    const chg=parseFloat(p.priceChange)||0;
+    if(p.hasAlert && Math.abs(chg)>=S.settings.threshold){
+      setStatus('alert','Price Change Detected','Fuel prices are changing tonight',p.direction==='up'?'⚠️':'✅');
+      renderAlertBody(p);
+      if(p.direction==='up'||S.settings.drop)
+        sendNotif('⚠️ Pakistan Fuel Price '+(p.direction==='up'?'Increase':'Decrease')+'!',p.headline||'Fuel update.',true);
+      if(p.direction==='up'&&S.settings.fillup)
+        setTimeout(()=>sendNotif('⛽ Fill Up Now!','Prices going up tonight at 11 PM. Fill your tank now!',true),3000);
+      addToHistory(p);
+      addLog(ts,'change',p.headline||'Price change detected');
+      document.getElementById('share-btn').style.display='';
+    } else {
+      setStatus('stable','Prices Stable','No upcoming price change announced','✅');
+      document.getElementById('alert-body').innerHTML=`<div style="padding:12px 0 4px;border-top:0.5px solid var(--sep);margin-top:12px"><div style="font-size:14px;color:var(--text-tertiary);line-height:1.5">${p.summary||'No changes announced by OGRA.'}</div></div>`;
+      addLog(ts,'stable',p.headline||'No change');
+    }
+    calcCost();
+  } catch(err){
+    setStatus('idle','Check Failed','Please try again','❌');
+    addLog(ts,'err',err.message);
+  }
+  const b=document.getElementById('check-btn');
+  b.disabled=false;
+  b.innerHTML='<span id="check-icon">⚡</span> Check Now';
+}
+
+function renderAlertBody(p){
+  const isDown=p.direction==='down';
+  document.getElementById('alert-body').innerHTML=`
+    <div class="delta-block">
+      <div class="delta-num ${isDown?'down':'up'}">${isDown?'▼':'▲'} ${Math.abs(parseFloat(p.priceChange)||0).toFixed(2)}<span class="delta-unit">Rs/L</span></div>
+      <div class="delta-headline">${p.headline||''}</div>
+      ${p.summary?`<div class="delta-summary">${p.summary}</div>`:''}
+      <div class="price-grid">
+        ${p.currentPetrolPrice?`<div class="price-tile"><div class="tile-label">Current Petrol</div><div class="tile-val">Rs ${p.currentPetrolPrice}<span class="tile-unit">/L</span></div></div>`:''}
+        ${p.newPetrolPrice?`<div class="price-tile ${isDown?'tile-down':'tile-new'}"><div class="tile-label">New Price</div><div class="tile-val ${isDown?'val-green':'val-red'}">Rs ${p.newPetrolPrice}<span class="tile-unit">/L</span></div></div>`:''}
+        ${p.currentDieselPrice?`<div class="price-tile"><div class="tile-label">Current Diesel</div><div class="tile-val">Rs ${p.currentDieselPrice}<span class="tile-unit">/L</span></div></div>`:''}
+        ${p.newDieselPrice?`<div class="price-tile ${isDown?'tile-down':'tile-new'}"><div class="tile-label">New Diesel</div><div class="tile-val ${isDown?'val-green':'val-red'}">Rs ${p.newDieselPrice}<span class="tile-unit">/L</span></div></div>`:''}
+      </div>
+      ${p.effectiveTime?`<div class="eff-pill">⏰ Effective: ${new Date(p.effectiveTime).toLocaleString('en-PK',{timeZone:'Asia/Karachi'})}</div>`:''}
+      ${!isDown?`<div class="fillup-banner"><span class="fillup-icon">🚨</span><div><div class="fillup-title">Fill Up Before 11 PM!</div><div class="fillup-sub">Prices going up tonight — refuel now to save money</div></div></div>`:''}
+      ${p.source?`<div class="source-line">Source: ${p.source} · Confidence: ${p.confidence}</div>`:''}
+    </div>`;
+}
+
+function renderPricesWidget(){
+  const p=S.prices;
+  document.getElementById('prices-grid').innerHTML=`
+    <div><div class="fuel-label">⛽ Petrol</div><div class="fuel-price">${p.petrol}</div><div class="fuel-unit" style="font-size:11px;margin-top:2px">Rs / Litre</div></div>
+    <div><div class="fuel-label">🛢 Diesel</div><div class="fuel-price">${p.diesel}</div><div class="fuel-unit" style="font-size:11px;margin-top:2px">Rs / Litre</div></div>
+    <div><div class="fuel-label">🕯 Kerosene</div><div class="fuel-price">${p.kerosene}</div><div class="fuel-unit" style="font-size:11px;margin-top:2px">Rs / Litre</div></div>
+    <div><div class="fuel-label">🔵 LPG</div><div class="fuel-price">${p.lpg}</div><div class="fuel-unit" style="font-size:11px;margin-top:2px">Rs / kg</div></div>`;
+}
+
+/* ── LOG ── */
+function addLog(ts,type,text){
+  S.log.unshift({ts,type,text});
+  if(S.log.length>12) S.log.pop();
+  const sec=document.getElementById('log-section');
+  const list=document.getElementById('log-list');
+  sec.style.display='';
+  list.innerHTML=S.log.map(e=>`
+    <div class="log-item">
+      <div class="log-dot ${e.type==='change'?'red':e.type==='stable'?'green':'warn'}"></div>
+      <div class="log-time">${e.ts}</div>
+      <div class="log-text">${e.text}</div>
+      <div class="log-badge ${e.type==='change'?'change':e.type==='stable'?'stable':'err'}">${e.type==='change'?'Change':e.type==='stable'?'Stable':'Error'}</div>
+    </div>`).join('');
+}
+
+/* ── SHARE ── */
+function sharePrice(){
+  const p=S.lastData; if(!p) return;
+  const txt=`⛽ Pakistan Fuel Update!\n${p.headline||''}\nPetrol: Rs ${p.newPetrolPrice||p.currentPetrolPrice}/L\nDiesel: Rs ${p.newDieselPrice||p.currentDieselPrice}/L\nSource: ${p.source||'OGRA'}\n[via PK Fuel Watch]`;
+  if(navigator.share) navigator.share({title:'PK Fuel Price Update',text:txt}).catch(()=>{});
+  else { navigator.clipboard?.writeText(txt); alert('Copied to clipboard!'); }
+}
+
+/* ── HISTORY ── */
+function addToHistory(p){
+  const d=new Date().toLocaleString('en-PK',{timeZone:'Asia/Karachi',month:'short',year:'2-digit'});
+  S.history.push({date:d,petrol:p.newPetrolPrice||S.prices.petrol,diesel:p.newDieselPrice||S.prices.diesel,change:parseFloat(p.priceChange)||0,dir:p.direction});
+}
+
+function renderHistory(){
+  const list=document.getElementById('hist-list');
+  list.innerHTML=[...S.history].reverse().map(h=>`
+    <div class="hist-item">
+      <div class="hist-badge ${h.dir}">${h.dir==='up'?'▲':h.dir==='down'?'▼':'–'}</div>
+      <div class="hist-info">
+        <div class="hist-date">${h.date}</div>
+        <div class="hist-fuel">Petrol · Diesel prices</div>
+      </div>
+      <div class="hist-right">
+        <div class="hist-chg ${h.dir}">${h.dir==='up'?'+':''}${h.change.toFixed(2)} Rs</div>
+        <div class="hist-price">Rs ${h.petrol}/L</div>
+      </div>
+    </div>`).join('');
+  renderChart(S.activeFuel);
+}
+
+function switchFuel(fuel,el){
+  S.activeFuel=fuel;
+  document.querySelectorAll('.seg-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  renderChart(fuel);
+}
+
+function renderChart(fuel){
+  const labels=S.history.map(h=>h.date);
+  const data=S.history.map(h=>h[fuel]||h.petrol);
+  const ctx=document.getElementById('priceChart').getContext('2d');
+  if(S.chart) S.chart.destroy();
+  const isDark=window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const accent=isDark?'#0a84ff':'#0078d4';
+  S.chart=new Chart(ctx,{
+    type:'line',
+    data:{labels,datasets:[{
+      data,fill:true,
+      borderColor:accent,borderWidth:2.5,
+      backgroundColor:isDark?'rgba(10,132,255,0.08)':'rgba(0,120,212,0.07)',
+      pointBackgroundColor:accent,pointRadius:4,pointHoverRadius:6,
+      tension:0.4
+    }]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{
+        backgroundColor:isDark?'#2c2c2e':'#ffffff',
+        borderColor:isDark?'rgba(255,255,255,0.1)':'rgba(0,0,0,0.1)',
+        borderWidth:1,
+        titleColor:isDark?'#ffffff':'#000000',
+        bodyColor:isDark?'#ebebf5':'#3c3c43',
+        padding:10,cornerRadius:10,
+        callbacks:{label:c=>`Rs ${c.parsed.y}`}
+      }},
+      scales:{
+        x:{grid:{color:isDark?'rgba(255,255,255,0.05)':'rgba(0,0,0,0.05)'},ticks:{color:isDark?'#8e8e93':'#8e8e93',font:{size:11,family:'Nunito Sans, Segoe UI, system-ui'}}},
+        y:{grid:{color:isDark?'rgba(255,255,255,0.05)':'rgba(0,0,0,0.05)'},ticks:{color:isDark?'#8e8e93':'#8e8e93',font:{size:11,family:'Nunito Sans, Segoe UI, system-ui'},callback:v=>`Rs ${v}`}}
+      }
+    }
+  });
+}
+
+/* ── CALCULATOR ── */
+function calcCost(){
+  const tank=parseFloat(document.getElementById('c-tank')?.value)||40;
+  const kml=parseFloat(document.getElementById('c-kml')?.value)||12;
+  const km=parseFloat(document.getElementById('c-km')?.value)||1200;
+  const cur=S.prices.petrol;
+  const litres=(km/kml);
+  const curCost=litres*cur;
+  const tankCost=tank*cur;
+  document.getElementById('r-litres').textContent=litres.toFixed(1)+' L';
+  document.getElementById('r-cur').textContent='Rs '+Math.round(curCost).toLocaleString();
+  document.getElementById('r-tank').textContent='Rs '+Math.round(tankCost).toLocaleString();
+
+  const p=S.lastData;
+  const newP=p?.newPetrolPrice||null;
+  if(newP){
+    const newCost=litres*newP;
+    const diff=newCost-curCost;
+    const newTank=tank*newP;
+    const tankDiff=newTank-tankCost;
+    document.getElementById('r-new-row').style.display='';
+    document.getElementById('r-diff-row').style.display='';
+    document.getElementById('r-save-row').style.display='';
+    const rNew=document.getElementById('r-new');
+    rNew.textContent='Rs '+Math.round(newCost).toLocaleString();
+    rNew.className='result-val '+(diff>0?'val-red':'val-green');
+    const rDiff=document.getElementById('r-diff');
+    rDiff.textContent=(diff>0?'+':'')+'Rs '+Math.round(diff).toLocaleString()+'/month';
+    rDiff.className='result-val '+(diff>0?'val-red':'val-green');
+    document.getElementById('r-save').textContent=(tankDiff>0?'+':'')+'Rs '+Math.abs(Math.round(tankDiff)).toLocaleString()+' per fill';
+
+    const fa=document.getElementById('fillup-advice');
+    if(newP>cur){
+      fa.innerHTML=`<div style="display:flex;align-items:flex-start;gap:12px"><span style="font-size:26px">🚨</span><div><div style="font-size:16px;font-weight:600;color:var(--danger);margin-bottom:4px">Fill up before 11 PM!</div><div style="font-size:14px;color:var(--text-secondary);line-height:1.5">You will save <strong>Rs ${Math.abs(Math.round(tankDiff)).toLocaleString()}</strong> by filling your tank at today's price of Rs ${cur}/L before the price goes up to Rs ${newP}/L.</div></div></div>`;
+    } else {
+      fa.innerHTML=`<div style="display:flex;align-items:flex-start;gap:12px"><span style="font-size:26px">😊</span><div><div style="font-size:16px;font-weight:600;color:var(--success);margin-bottom:4px">Wait to fill up!</div><div style="font-size:14px;color:var(--text-secondary);line-height:1.5">Prices are dropping. Fill up after 11 PM and save <strong>Rs ${Math.abs(Math.round(tankDiff)).toLocaleString()}</strong> per tank.</div></div></div>`;
+    }
+  } else {
+    ['r-new-row','r-diff-row','r-save-row'].forEach(id=>document.getElementById(id).style.display='none');
+    document.getElementById('fillup-advice').innerHTML='<div style="font-size:14px;color:var(--text-tertiary)">Run a price check first to see personalised fill-up advice</div>';
+  }
+}
+
+/* ── SETTINGS ── */
+function saveSetting(key,val){
+  S.settings[key]=(val==='true'||val===true||val==='on') ? true : isNaN(val)?val:parseFloat(val)||val;
+  if(key==='nightly') document.getElementById('tonight-card').style.display=S.settings.nightly?'flex':'none';
+}
+
+/* INIT */
+renderPricesWidget();
+</script>
+</body>
+</html>
